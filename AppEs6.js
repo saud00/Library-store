@@ -14,26 +14,29 @@ class BookList{
     insertValues(){
         console.log('prototype call')
         console.log('i = ', i)
-        i = storeArr.length + 1
+        i = storeArr.length
 
         const tr = document.createElement('tr');
         tr.id =i;
         tr.innerHTML = `
-        <th scope="row">${i}</th>
+        <th class="i" scope="row">${i}</th>
         <td>${this.title}</td>
         <td>${this.author}</td>
         <td>${this.isbn}</td>
         <td><a href="#"><i id="remove" class="fas fa-times"></i></a></td>
         `
         tbody.appendChild(tr)
-        
-        console.log('main')
     }
     
     removeItem(item){
         
                 item.remove();
 
+                const rearrangeId = document.querySelectorAll('.i')
+                rearrangeId.forEach(function(val,ind){
+                    val.innerText = ind + 1
+                    val.parentElement.id = ind + 1
+                })
     }
     
     validate(msg, b){
@@ -88,27 +91,28 @@ class store{
         
         storeArr.forEach(function(val,ind){
             const tr = document.createElement('tr');
-            tr.id =ind+1;
+            tr.id =i;
             tr.innerHTML = `
-            <th scope="row">${ind+1}</th>
+            <th class='i' scope="row">${i}</th>
             <td>${val.Title}</td>
             <td>${val.Author}</td>
             <td>${val.ISBN}</td>
             <td><a href="#"><i id="remove" class="fas fa-times"></i></a></td>
             `
             tbody.appendChild(tr)
+            i++
         })
     
 }
         static deleteBook(id){
-
+            console.log(id)
             const itemId = parseInt(id);
-            console.log(itemId)
     
             storeArr.forEach(function(val,ind){
-                if(ind === itemId){
-                    console.log(ind)
-                    storeArr.splice(ind-1, 1)
+                console.log(ind," , ", itemId)
+                if(ind+1 === itemId){
+                    console.log(ind," , ", itemId)
+                    storeArr.splice(ind, 1)
                     console.log(val)
                 }
                 localStorage.setItem('storeArr',JSON.stringify(storeArr))
