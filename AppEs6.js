@@ -10,49 +10,46 @@ class BookList{
         this.isbn = c;
 
     }
-
+    
     insertValues(){
         console.log('prototype call')
-        i +=1;
+        console.log('i = ', i)
+        i = storeArr.length + 1
+
         const tr = document.createElement('tr');
         tr.id =i;
-       tr.innerHTML = `
-       <th scope="row">${i}</th>
-       <td>${this.title}</td>
-       <td>${this.author}</td>
-       <td>${this.isbn}</td>
-       <td><a href="#"><i id="remove" class="fas fa-times"></i></a></td>
-       `
-       tbody.appendChild(tr)
-       
+        tr.innerHTML = `
+        <th scope="row">${i}</th>
+        <td>${this.title}</td>
+        <td>${this.author}</td>
+        <td>${this.isbn}</td>
+        <td><a href="#"><i id="remove" class="fas fa-times"></i></a></td>
+        `
+        tbody.appendChild(tr)
+        
+        console.log('main')
     }
-
-    removeItem(){
-
-        document.addEventListener('mousedown',function(e){
-            if(e.target.id == 'remove'){
-               const item = e.target.parentElement.parentElement.parentElement;
-               item.remove();
-               obj.validate(msg='Book deleted successfully!', b='pass')
     
-            }
-        })
-    }
+    removeItem(item){
+        
+                item.remove();
 
+    }
+    
     validate(msg, b){
         console.log('validate triggered')
-    
+        
         const input =  document.createElement('input')
         const div1 =  document.createElement('div')
         input.value = msg
         input.style.color = "white"
         input.setAttribute('disabled', '')
         {b === "pass" ? 
-            input.style.backgroundColor = 'green' :
+        input.style.backgroundColor = 'green' :
         input.style.backgroundColor = 'red'}
         div1.appendChild(input)
         card.insertBefore(div1,form);
-    
+        
         setTimeout(() => {
             div1.remove()
         }, 2000);
@@ -63,45 +60,109 @@ class BookList{
 let storeArr = []
 
 class store{
-    static addBook(a,b,c){
-        console.log(a,b,c)
-        const books = {'Title':a,'Author': b,'ISBN': c}
-        console.log(books)
-        storeArr.push(books)
-        console.log(storeArr)
-        localStorage.setItem('key', JSON.stringify(storeArr))
-
-
+    static localData(i, a, b, c){
+        
+        const books = { "#":i , 'Title':a,'Author': b,'ISBN': c}
+        i = storeArr.length + 1
+        console.log('i = ', i)
+        
+        if(localStorage.getItem('storeArr')=== null){
+            i=1
+            storeArr = []
+        }else{
+            storeArr = JSON.parse(localStorage.getItem('storeArr'))
+        }
+        storeArr.push(books);
+        localStorage.setItem('storeArr', JSON.stringify(storeArr))
+        
     }
-    deleteBook(){
 
-    }
-
+    static addBook(){
+        i = storeArr.length + 1
+        if(localStorage.getItem('storeArr')=== null){
+            i=1
+            storeArr = []
+        }else{
+            storeArr = JSON.parse(localStorage.getItem('storeArr'))
+        }
+        
+        storeArr.forEach(function(val,ind){
+            const tr = document.createElement('tr');
+            tr.id =ind+1;
+            tr.innerHTML = `
+            <th scope="row">${ind+1}</th>
+            <td>${val.Title}</td>
+            <td>${val.Author}</td>
+            <td>${val.ISBN}</td>
+            <td><a href="#"><i id="remove" class="fas fa-times"></i></a></td>
+            `
+            tbody.appendChild(tr)
+        })
+    
 }
+        static deleteBook(id){
 
-
-let i=0, obj;
-form.addEventListener('submit', function(){
-    const title = document.querySelector('#book-title').value;
-    const author = document.querySelector('#author').value;
-    const isbn = document.querySelector('#ISBN').value;
+            const itemId = parseInt(id);
+            console.log(itemId)
     
-    obj = new BookList(title,author, isbn);
-    console.log(obj)
+            storeArr.forEach(function(val,ind){
+                if(ind === itemId){
+                    console.log(ind)
+                    storeArr.splice(ind-1, 1)
+                    console.log(val)
+                }
+                localStorage.setItem('storeArr',JSON.stringify(storeArr))
+            })
+            
+            
+        }
+        
+    }
     
-    const storeObj = new store(title,author, isbn)
-    store.addBook(title,author, isbn);
-    console.log(storeObj)
+    let i, obj;
+    document.addEventListener('DOMContentLoaded', store.addBook)
+    
+    form.addEventListener('submit', function(e){
+        e.preventDefault()
+        const title = document.querySelector('#book-title').value;
+        const author = document.querySelector('#author').value;
+        const isbn = document.querySelector('#ISBN').value;
+        
+        obj = new BookList(title,author, isbn);
+        
+        const storeObj = new store(title,author, isbn)
+        
+        
+        if(title == "" || author == "" || isbn == ""){
+            obj.validate(msg='Fill all the fields', b='fail')
+            
+        }else{
+            store.localData(i, title, author, isbn);
+            
+            obj.insertValues()   // insert values in table
+            
+            
+            obj.validate(msg='Book Added successfully!', b='pass')
+        }
+        
+    })
     
     
-    if(title == "" || author == "" || isbn == ""){
-        obj.validate(msg='Fill all the fields', b='fail')
-    }else{
-        obj.insertValues()   // insert values in table
-        obj.removeItem()    // remove any value if needed
-        obj.validate(msg='Book Added successfully!', b='pass')
-     }
-
-})
-
-
+    
+    
+    document.addEventListener('click',function(e){
+        console.log('copy remove item')
+        
+        const obj = new BookList()
+        
+        if(e.target.id === 'remove'){
+            
+            obj.removeItem(e.target.parentElement.parentElement.parentElement)    // remove any value if needed
+        
+            store.deleteBook(e.target.parentElement.parentElement.parentElement.id)
+            
+            obj.validate(msg='Book deleted successfully!', b='pass')
+            
+            
+        }
+    })
